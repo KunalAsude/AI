@@ -8,7 +8,7 @@ const int ROWS = 3, COLS = 3;
 
 struct Node {
     int x, y, cost, heuristic, parentX, parentY;
-    Node(int x, int y, int cost, int heuristic, int parentX, int parentY) {
+    Node(int x = -1, int y = -1, int cost = 0, int heuristic = 0, int parentX = -1, int parentY = -1) {
         this->x = x;
         this->y = y;
         this->cost = cost;
@@ -46,7 +46,14 @@ void AStar(int grid[ROWS][COLS], int sx, int sy, int gx, int gy) {
 
     int dx[] = {-1, 1, 0, 0}, dy[] = {0, 0, -1, 1};
     bool visited[ROWS][COLS] = {false};
-    Node parent[ROWS][COLS] = {Node(-1, -1, 0, 0, -1, -1)};
+    
+    // Fix: Properly initialize the parent array
+    Node parent[ROWS][COLS];
+    for (int i = 0; i < ROWS; i++) {
+        for (int j = 0; j < COLS; j++) {
+            parent[i][j] = Node();
+        }
+    }
 
     while (!openSet.empty()) {
         Node current = openSet.top();
@@ -64,7 +71,7 @@ void AStar(int grid[ROWS][COLS], int sx, int sy, int gx, int gy) {
             int nx = current.x + dx[i], ny = current.y + dy[i];
             if (nx >= 0 && nx < ROWS && ny >= 0 && ny < COLS && grid[nx][ny] == 0 && !visited[nx][ny]) {
                 openSet.push(Node(nx, ny, current.cost + 1, heuristic(nx, ny, gx, gy), current.x, current.y));
-                parent[nx][ny] = current;
+                parent[nx][ny] = Node(nx, ny, 0, 0, current.x, current.y);
             }
         }
     }
