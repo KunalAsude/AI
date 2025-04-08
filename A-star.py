@@ -1,76 +1,111 @@
-# Function to print the board in 3x3 format
-def print_board(board):
+g = 0  # global cost from start (g(n))
+
+# Function to display the board
+def print_board(elements):
     for i in range(9):
         if i % 3 == 0:
-            print()  # Move to new line after every 3 elements
-        print("_" if board[i] == -1 else board[i], end=" ")
+            print()
+        if elements[i] == -1:
+            print("_", end=" ")
+        else:
+            print(elements[i], end=" ")
     print()
 
-def heuristic(current, goal):
+# Manhattan Distance Heuristic + g(n)
+def heuristic(start, goal):
+    global g
     h = 0
     for i in range(9):
-        if current[i] != -1:  # Skip the empty tile
-            goal_pos = goal.index(current[i]) 
-            h += abs(goal_pos // 3 - i // 3) + abs(goal_pos % 3 - i % 3) 
-    return h
+        if start[i] == -1:
+            continue
+        goal_pos = goal.index(start[i])
+        h += abs(goal_pos // 3 - i // 3) + abs(goal_pos % 3 - i % 3)
+    return h + g
 
-# Move the empty tile (-1) in the given direction if possible
-def move_tile(board, direction):
-    idx = board.index(-1)
-    new_board = board[:]  
+# Movement functions
+def moveleft(state, pos):
+    state[pos], state[pos - 1] = state[pos - 1], state[pos]
 
-    if direction == "left" and idx % 3 != 0:
-        new_board[idx], new_board[idx - 1] = new_board[idx - 1], new_board[idx]
-    elif direction == "right" and idx % 3 != 2:
-        new_board[idx], new_board[idx + 1] = new_board[idx + 1], new_board[idx]
-    elif direction == "up" and idx >= 3:
-        new_board[idx], new_board[idx - 3] = new_board[idx - 3], new_board[idx]
-    elif direction == "down" and idx < 6:
-        new_board[idx], new_board[idx + 3] = new_board[idx + 3], new_board[idx]
-    return new_board
+def moveright(state, pos):
+    state[pos], state[pos + 1] = state[pos + 1], state[pos]
 
-# Try all 4 possible moves and return the one with the lowest heuristic
-def best_move(board, goal):
-    directions = ["left", "right", "up", "down"]
-    best = None
-    lowest = float('inf')  
-    for direction in directions:
-        new_board = move_tile(board, direction)
-        if new_board != board: 
-            h = heuristic(new_board, goal)
-            if h < lowest:
-                lowest = h
-                best = new_board
-    return best
+def moveup(state, pos):
+    state[pos], state[pos - 3] = state[pos - 3], state[pos]
 
-# Main solving function
-def solve_puzzle(start, goal):
-    current = start[:]  
-    moves = 0           
+def movedown(state, pos):
+    state[pos], state[pos + 3] = state[pos + 3], state[pos]
 
-    # Loop until we reach the goal state
-    while current != goal:
-        print(f"\nMove {moves}:")
-        print_board(current)
-        current = best_move(current, goal) 
-        moves += 1
+# Function to move the blank tile in the best direction
+def movetile(start, goal):
+    empty_at = start.index(-1)
+    row = empty_at // 3
+    col = empty_at % 3
 
-    print(f"\nSolved in {moves} moves!")
-    print_board(current)
+    # Create copies for all 4 possible moves
+    t1 = start[:]
+    t2 = start[:]
+    t3 = start[:]
+    t4 = start[:]
+    f1 = f2 = f3 = f4 = float('inf')
 
+    if col - 1 >= 0:
+        moveleft(t1, empty_at)
+        f1 = heuristic(t1, goal)
+    if col + 1 < 3:
+        moveright(t2, empty_at)
+        f2 = heuristic(t2, goal)
+    if row + 1 < 3:
+        movedown(t3, empty_at)
+        f3 = heuristic(t3, goal)
+    if row - 1 >= 0:
+        moveup(t4, empty_at)
+        f4 = heuristic(t4, goal)
+
+    # Choose the best (minimum f(n))
+    min_heuristic = min(f1, f2, f3, f4)
+
+    if f1 == min_heuristic:
+        moveleft(start, empty_at)
+    elif f2 == min_heuristic:
+        moveright(start, empty_at)
+    elif f3 == min_heuristic:
+        movedown(start, empty_at)
+    elif f4 == min_heuristic:
+        moveup(start, empty_at)
+
+# Recursive A* solve
+def solveEight(start, goal):
+    global g
+    g += 1
+    movetile(start, goal)
+    print_board(start)
+    f = heuristic(start, goal)
+
+    if f == g:
+        print("Solved in {} moves".format(f))
+        return
+
+    solveEight(start, goal)
+
+# Main function
 def main():
+    global g
     start = []
     goal = []
 
-    print("Enter Start State (-1 for empty) (all 9 numbers separated by space):")
-    start = list(map(int, input().split()))
+    print("Enter the start state (use -1 for empty tile):")
+    for _ in range(9):
+        start.append(int(input()))
 
-    print("Enter Goal State (all 9 numbers separated by space):")
-    goal = list(map(int, input().split()))
+    print("Enter the goal state (use -1 for empty tile):")
+    for _ in range(9):
+        goal.append(int(input()))
 
+    print("\n Initial Board:")
+    print_board(start)
+    print("\n Solving...\n")
+    solveEight(start, goal)
 
-
-    solve_puzzle(start, goal)
-
-if __name__ == "__main__":
+# Run the program
+if __name__ == '__main__':
     main()
