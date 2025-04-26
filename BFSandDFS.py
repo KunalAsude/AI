@@ -1,15 +1,12 @@
 from collections import deque
 
-graph = [[] for _ in range(5)]
+graph = [[] for _ in range(6)]
 
 graph[0].extend([1, 2])
-graph[1].append(2)
-graph[2].append(3)
-graph[3].append(4)
-graph[2].append(0)
-graph[1].append(0)
-graph[3].append(2)
-graph[4].append(3)
+graph[1].append(3)
+graph[2].append(4)
+graph[3].append(5)
+graph[4].append(5)
 
 def dfs(node, visited):
     visited[node] = True

@@ -12,7 +12,7 @@ selection_sort(arr)
 print("Sorted array:", arr)
 
 # userinput = input("Enter a list of numbers separated by spaces: ")
-# userinput = userinput.split()   
+# userinput = user-input.split()   
 # userinput = [int(i) for i in userinput]
 # selection_sort(userinput)
 # print("Sorted user input:", userinput)
